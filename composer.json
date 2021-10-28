@@ -1,14 +1,14 @@
 {
-    "name": "fsac/laravel-valuestore",
-    "description": "Easily store values in a JSON file",
+    "name": "fsac/laravel-argonaut",
+    "description": "Conveniently work with file-based JSON stores",
     "keywords": [
         "laravel",
+        "argonaut",
         "value",
         "store",
-        "valuestore",
         "json"
     ],
-    "homepage": "https://fullstackapp.co/docs/laravel-valuestore",
+    "homepage": "https://fullstackapp.co/docs/laravel-argonaut",
     "license": "MIT",
     "authors": [
         {
@@ -18,13 +18,35 @@
             "role": "developer"
         }
     ],
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "FullStackAppCo\\Valuestore\\": "src"
+            "FullStackAppCo\\Argonaut\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require-dev": {
-        "orchestra/testbench": "7.0.x-dev"
+        "orchestra/testbench": "^6.22",
+        "rector/rector": "^0.11.60"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FullStackAppCo\\Argonaut\\ServiceProvider"
+            ],
+            "aliases": [
+                "FullStack"
+            ]
+        }
     }
 }
