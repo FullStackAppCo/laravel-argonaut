@@ -1,0 +1,30 @@
+{
+    "name": "fsac/laravel-valuestore",
+    "description": "Easily store values in a JSON file",
+    "keywords": [
+        "laravel",
+        "value",
+        "store",
+        "valuestore",
+        "json"
+    ],
+    "homepage": "https://fullstackapp.co/docs/laravel-valuestore",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joby Harding",
+            "email": "code@fullstackapp.co",
+            "homepage": "https://fullstackapp.co",
+            "role": "developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "FullStackAppCo\\Valuestore\\": "src"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "7.0.x-dev"
+    }
+}
