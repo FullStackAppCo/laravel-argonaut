@@ -85,7 +85,7 @@ class Argonaut
     protected function write(array $data): static
     {
         if (! empty($data)) {
-            $this->disk->put($this->path, json_encode($data));
+            $this->disk->put($this->path, json_encode($data, JSON_PRETTY_PRINT));
             return $this;
         }
 
