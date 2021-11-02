@@ -17,12 +17,12 @@ class Argonaut
     /**
      * Convenience factory method.
      */
-    public static function build(string|array $config, array $data = []): static
+    public static function build(string|array $config): static
     {
         return app(static::class, [
             'path' => $config['path'] ?? $config,
             'disk' => data_get($config, 'disk'),
-        ])->write($data);
+        ]);
     }
 
     /**

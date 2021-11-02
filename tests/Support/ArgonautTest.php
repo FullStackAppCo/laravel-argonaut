@@ -67,19 +67,6 @@ class ArgonautTest extends TestCase
         $this->assertNull($store->get('foo'));
     }
 
-    public function testItCanBeInitializedWithData()
-    {
-        Storage::fake();
-        $data = [
-            'one' => 7,
-            'two' => 'test',
-            3 => ['foo', 'bar'],
-        ];
-        Argonaut::build('settings.json', $data)->save();
-
-        $this->assertEquals($data, json_decode(Storage::get('settings.json'), true));
-    }
-
     public function testEmptyDataIsNotPersisted()
     {
         Storage::fake();
@@ -154,4 +141,12 @@ class ArgonautTest extends TestCase
         $this->expectExceptionMessage("Store 'site' is not configured");
         Argonaut::store('site');
     }
+
+//    public function ()
+//    {
+//        Storage::fake();
+//        $this->expectException(ErrorException::class);
+//        $this->expectExceptionMessage("Store 'site' is not configured");
+//        Argonaut::store('site');
+//    }
 }
