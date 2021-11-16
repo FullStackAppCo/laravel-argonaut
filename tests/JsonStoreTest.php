@@ -1,14 +1,14 @@
 <?php
-namespace Tests\Support;
+namespace Tests;
 
 use ErrorException;
 use FullStackAppCo\Argonaut\ServiceProvider;
-use FullStackAppCo\Argonaut\Support\Argonaut;
+use FullStackAppCo\Argonaut\JsonStore;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Orchestra\Testbench\TestCase;
 
-class ArgonautTest extends TestCase
+class JsonStoreTest extends TestCase
 {
     protected function getPackageProviders($app)
     {
@@ -24,13 +24,13 @@ class ArgonautTest extends TestCase
 
     public function testBuildCreatesInstance()
     {
-        $this->assertInstanceOf(Argonaut::class, Argonaut::build('settings.json'));
+        $this->assertInstanceOf(JsonStore::class, JsonStore::build('settings.json'));
     }
 
     public function testItStoresInDefaultFilesystem()
     {
         Storage::fake();
-        $store = Argonaut::build('settings.json')->put('color', 'yellow')->save();
+        $store = JsonStore::build('settings.json')->put('color', 'yellow')->save();
 
         $this->assertTrue(Storage::exists('settings.json'));
         $this->assertSame('yellow', $store->get('color'));
@@ -39,14 +39,14 @@ class ArgonautTest extends TestCase
     public function testItReturnsEmptyArrayWhenNoFile()
     {
         Storage::fake();
-        $this->assertEquals([], Argonaut::build('settings.json')->all());
-        $this->assertFalse(Storage::exists('settings.json'));
+        $this->assertEquals([], JsonStore::build('settings.json')->all());
+        Storage::assertMissing('settings.json');
     }
 
     public function testItUsesDotSyntax()
     {
         Storage::fake();
-        $store = Argonaut::build('settings.json');
+        $store = JsonStore::build('settings.json');
         $store->put('color.primary', '#F00BA9')->save();
 
         $this->assertEquals([
@@ -60,7 +60,7 @@ class ArgonautTest extends TestCase
     public function testItCanForgetValues()
     {
         Storage::fake();
-        $store = Argonaut::build('settings.json')
+        $store = JsonStore::build('settings.json')
             ->put('foo', 'bar')
             ->forget('foo');
 
@@ -70,25 +70,25 @@ class ArgonautTest extends TestCase
     public function testEmptyDataIsNotPersisted()
     {
         Storage::fake();
-        $store = Argonaut::build('settings.json', []);
+        $store = JsonStore::build('settings.json', []);
 
         $this->assertFalse(Storage::exists('settings.json'));
 
         $store->put('test', 234)->save();
-        $this->assertTrue(Storage::exists('settings.json'));
+        Storage::assertExists('settings.json');
     }
 
     public function testDiskCanBeConfigured()
     {
         Storage::fake('local');
-        Argonaut::build([
+        JsonStore::build([
             'path' => 'settings/theme.json',
             'disk' => 'local'
         ])
             ->put('color', 'yellow')
             ->save();
 
-        $this->assertTrue(Storage::disk('local')->exists('settings/theme.json'));
+        Storage::disk('local')->assertExists('settings/theme.json');
     }
 
     public function testDiskCanBeOnDemand()
@@ -98,20 +98,20 @@ class ArgonautTest extends TestCase
             'root' => Storage::disk('local')->path('on-demand'),
             'driver' => 'local'
         ]);
-        Argonaut::build([
+        JsonStore::build([
             'path' => 'settings.json',
             'disk' => $disk,
         ])
             ->put('color', 'yellow')
             ->save();
 
-        $this->assertTrue(Storage::disk('local')->exists('on-demand/settings.json'));
+        Storage::disk('local')->assertExists('on-demand/settings.json');
     }
 
     public function testPath()
     {
         Storage::fake();
-        $store = Argonaut::build('path/to/settings.json');
+        $store = JsonStore::build('path/to/settings.json');
 
         $this->assertSame('path/to/settings.json', $store->path());
         $this->assertSame(Storage::path('path/to/settings.json'), $store->path($absolute = true));
@@ -128,7 +128,7 @@ class ArgonautTest extends TestCase
                ],
            ],
         ]);
-        $store = Argonaut::store('theme')->put('colors.primary', 'pink')->save();
+        $store = JsonStore::store('theme')->put('colors.primary', 'pink')->save();
 
         $this->assertTrue(Storage::exists('settings/theme.json'));
         $this->assertSame($store->get('colors.primary'), 'pink');
@@ -139,14 +139,15 @@ class ArgonautTest extends TestCase
         Storage::fake();
         $this->expectException(ErrorException::class);
         $this->expectExceptionMessage("Store 'site' is not configured");
-        Argonaut::store('site');
+        JsonStore::store('site');
     }
 
-//    public function ()
+//    public function testItCachesStore ()
 //    {
 //        Storage::fake();
-//        $this->expectException(ErrorException::class);
-//        $this->expectExceptionMessage("Store 'site' is not configured");
-//        Argonaut::store('site');
+//        $store = JsonFile::build('settings.json')->put('color', 'yellow')->save();
+//        $store->put('theme', 'dark')->save();
+//
+//        $this->assertFalse(Cache::has('argonaut:'))
 //    }
 }

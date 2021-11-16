@@ -1,14 +1,13 @@
 <?php
 
-namespace FullStackAppCo\Argonaut\Support;
+namespace FullStackAppCo\Argonaut;
 
 use ErrorException;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 
-class Argonaut
+class JsonStore
 {
     protected array $data;
 

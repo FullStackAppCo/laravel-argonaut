@@ -2,7 +2,7 @@
 
 namespace FullStackAppCo\Argonaut;
 
-use FullStackAppCo\Argonaut\Support\Argonaut;
+use FullStackAppCo\Argonaut\JsonStore;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider as BaseProvider;
 
@@ -10,8 +10,8 @@ class ServiceProvider extends BaseProvider
 {
     public function register()
     {
-        $this->app->bind(Argonaut::class, function ($app, $args) {
-            return new Argonaut(
+        $this->app->bind(JsonStore::class, function ($app, $args) {
+            return new JsonStore(
                 $args['path'],
                 with($args['disk'] ?? null, fn ($disk) =>
                     $disk instanceof Filesystem

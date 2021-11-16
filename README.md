@@ -8,3 +8,5 @@ You don't want the preferences to be transferred from one site to another when y
 You want to leverage the hierarchical nature of JSON to group values stored.
 
 My use case was theme and sitewide settings.
+
+It's not a _preference_ because you don't want to associate with a particular model. Creating an 'App' or 'Site' model just to store settings seems a bit naff.
