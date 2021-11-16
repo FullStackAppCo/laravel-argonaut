@@ -5,6 +5,8 @@ namespace FullStackAppCo\Argonaut;
 use ErrorException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 
 class JsonStore
@@ -13,15 +15,23 @@ class JsonStore
 
     protected static array $stores;
 
+    protected bool $testing = false;
+
     /**
      * Convenience factory method.
      */
     public static function build(string|array $config): static
     {
-        return app(static::class, [
+        $store = app(static::class, [
             'path' => $config['path'] ?? $config,
             'disk' => data_get($config, 'disk'),
         ]);
+
+        if (App::environment('testing') === true) {
+            $store->testing();
+        }
+
+        return $store;
     }
 
     /**
@@ -36,10 +46,16 @@ class JsonStore
 
     public function __construct(
         protected string|array $path,
-        protected Filesystem $disk
+        protected Filesystem $disk,
     )
     {
         //
+    }
+
+    public function testing(bool $testing = true): static
+    {
+        $this->testing = $testing;
+        return $this;
     }
 
     public function path($absolute = false): string
@@ -53,11 +69,18 @@ class JsonStore
             return $this->data;
         }
 
-        if (! $this->disk->exists($this->path)) {
+        if (Cache::has($this->cacheKey())) {
+            $decoded = json_decode(Cache::get($this->cacheKey()), $associative = true);
+            if ($decoded !== null) {
+                return $this->data = $decoded;
+            }
+        }
+
+        if ($this->disk->exists($this->path) === false) {
             return [];
         }
 
-        return $this->data = json_decode($this->disk->get($this->path), true, JSON_THROW_ON_ERROR);
+        return $this->data = json_decode($this->disk->get($this->path), $associative = true, JSON_THROW_ON_ERROR);
     }
 
     public function put(string $key, mixed $value): static
@@ -83,16 +106,31 @@ class JsonStore
 
     protected function write(array $data): static
     {
-        if (! empty($data)) {
-            $this->disk->put($this->path, json_encode($data, JSON_PRETTY_PRINT));
+        if ($this->testing === true) {
             return $this;
         }
 
-        if ($this->disk->exists($this->path)) {
-            $this->disk->delete($this->path);
+        if (empty($data) === true) {
+            if ($this->disk->exists($this->path)) {
+                $this->disk->delete($this->path);
+            }
+
+            Cache::forget($this->cacheKey());
+
+            return $this;
         }
 
+        tap(json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR), function ($encoded) {
+            $this->disk->put($this->path, $encoded);
+            Cache::put($this->cacheKey(), $encoded);
+        });
+
         return $this;
+    }
+
+    protected function cacheKey(): string
+    {
+        return 'argonaut:' . md5($this->path(true));
     }
 
     public function save(): static

@@ -4,9 +4,11 @@ namespace Tests;
 use ErrorException;
 use FullStackAppCo\Argonaut\ServiceProvider;
 use FullStackAppCo\Argonaut\JsonStore;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Orchestra\Testbench\TestCase;
+use ReflectionProperty;
 
 class JsonStoreTest extends TestCase
 {
@@ -15,6 +17,15 @@ class JsonStoreTest extends TestCase
         return [
             ServiceProvider::class
         ];
+    }
+
+    protected function unsetTesting(JsonStore $store): JsonStore
+    {
+        $property = new ReflectionProperty(JsonStore::class, 'testing');
+        $property->setAccessible(true);
+        $property->setValue($store, false);
+
+        return $store;
     }
 
     protected function setUp(): void
@@ -30,23 +41,23 @@ class JsonStoreTest extends TestCase
     public function testItStoresInDefaultFilesystem()
     {
         Storage::fake();
-        $store = JsonStore::build('settings.json')->put('color', 'yellow')->save();
+        $store = (new JsonStore('settings.json', Storage::disk()))->put('color', 'yellow')->save();
 
-        $this->assertTrue(Storage::exists('settings.json'));
+        Storage::assertExists('settings.json');
         $this->assertSame('yellow', $store->get('color'));
     }
 
     public function testItReturnsEmptyArrayWhenNoFile()
     {
         Storage::fake();
-        $this->assertEquals([], JsonStore::build('settings.json')->all());
+        $this->assertEquals([], (new JsonStore('settings.json', Storage::disk()))->all());
         Storage::assertMissing('settings.json');
     }
 
     public function testItUsesDotSyntax()
     {
         Storage::fake();
-        $store = JsonStore::build('settings.json');
+        $store = new JsonStore('settings.json', Storage::disk());
         $store->put('color.primary', '#F00BA9')->save();
 
         $this->assertEquals([
@@ -60,7 +71,7 @@ class JsonStoreTest extends TestCase
     public function testItCanForgetValues()
     {
         Storage::fake();
-        $store = JsonStore::build('settings.json')
+        $store = (new JsonStore('settings.json', Storage::disk()))
             ->put('foo', 'bar')
             ->forget('foo');
 
@@ -70,9 +81,9 @@ class JsonStoreTest extends TestCase
     public function testEmptyDataIsNotPersisted()
     {
         Storage::fake();
-        $store = JsonStore::build('settings.json', []);
+        $store = (new JsonStore('settings.json', Storage::disk()))->save();
 
-        $this->assertFalse(Storage::exists('settings.json'));
+        Storage::assertMissing('settings.json');
 
         $store->put('test', 234)->save();
         Storage::assertExists('settings.json');
@@ -81,12 +92,12 @@ class JsonStoreTest extends TestCase
     public function testDiskCanBeConfigured()
     {
         Storage::fake('local');
-        JsonStore::build([
+        $store = JsonStore::build([
             'path' => 'settings/theme.json',
             'disk' => 'local'
-        ])
-            ->put('color', 'yellow')
-            ->save();
+        ])->put('color', 'yellow');
+
+        $this->unsetTesting($store)->save();
 
         Storage::disk('local')->assertExists('settings/theme.json');
     }
@@ -98,12 +109,12 @@ class JsonStoreTest extends TestCase
             'root' => Storage::disk('local')->path('on-demand'),
             'driver' => 'local'
         ]);
-        JsonStore::build([
+        $store = JsonStore::build([
             'path' => 'settings.json',
             'disk' => $disk,
-        ])
-            ->put('color', 'yellow')
-            ->save();
+        ])->put('color', 'yellow');
+
+        $this->unsetTesting($store)->save();
 
         Storage::disk('local')->assertExists('on-demand/settings.json');
     }
@@ -111,7 +122,7 @@ class JsonStoreTest extends TestCase
     public function testPath()
     {
         Storage::fake();
-        $store = JsonStore::build('path/to/settings.json');
+        $store = new JsonStore('path/to/settings.json', Storage::disk());
 
         $this->assertSame('path/to/settings.json', $store->path());
         $this->assertSame(Storage::path('path/to/settings.json'), $store->path($absolute = true));
@@ -128,9 +139,10 @@ class JsonStoreTest extends TestCase
                ],
            ],
         ]);
-        $store = JsonStore::store('theme')->put('colors.primary', 'pink')->save();
+        $store = JsonStore::store('theme')->put('colors.primary', 'pink');
+        $this->unsetTesting($store)->save();
 
-        $this->assertTrue(Storage::exists('settings/theme.json'));
+        Storage::assertExists('settings/theme.json');
         $this->assertSame($store->get('colors.primary'), 'pink');
     }
 
@@ -142,12 +154,50 @@ class JsonStoreTest extends TestCase
         JsonStore::store('site');
     }
 
-//    public function testItCachesStore ()
-//    {
-//        Storage::fake();
-//        $store = JsonFile::build('settings.json')->put('color', 'yellow')->save();
-//        $store->put('theme', 'dark')->save();
-//
-//        $this->assertFalse(Cache::has('argonaut:'))
-//    }
+    public function testItDoesNotPersistInTesting()
+    {
+        Storage::fake();
+        (new JsonStore('settings.json', Storage::disk()))
+            ->testing()
+            ->put('foo', 'bar')
+            ->save();
+
+        Storage::assertMissing('settings.json');
+    }
+
+    public function testItCachesOnSave ()
+    {
+        Storage::fake();
+        $store = JsonStore::build('settings.json')->put('color', 'yellow');
+        $key = 'argonaut:' . md5($store->path(true));
+
+        $this->assertFalse(Cache::has($key));
+        $this->unsetTesting($store)->save();
+        $this->assertTrue(Cache::has($key));
+        $this->assertSame(['color' => 'yellow'], json_decode(Cache::get($key), $associative = true));
+    }
+
+    public function testEmptyDataClearsCache ()
+    {
+        Storage::fake();
+        $store = $this->unsetTesting(JsonStore::build('settings.json'));
+
+        $key = 'argonaut:' . md5($store->path(true));
+        Cache::put($key, 'This data will be purged');
+
+        $this->assertSame(Cache::get($key), 'This data will be purged');
+        $store->save();
+        $this->assertFalse(Cache::has($key));
+    }
+
+    public function testItUsesCachedDataWhenAvailable ()
+    {
+        Storage::fake();
+        $store = new JsonStore('settings.json', Storage::disk());
+
+        $key = 'argonaut:' . md5($store->path(true));
+        Cache::set($key, json_encode(['color' => 'yellow']));
+
+        $this->assertSame('yellow', $store->get('color'));
+    }
 }
