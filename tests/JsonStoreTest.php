@@ -200,31 +200,4 @@ class JsonStoreTest extends TestCase
 
         $this->assertSame('yellow', $store->get('color'));
     }
-
-    public function testStaticCacheDisabledInTest ()
-    {
-        Storage::fake();
-
-        Config::set('argonaut', [
-            'stores' => [
-                'theme' => [
-                    'disk' => 'local',
-                    'path' => 'settings.json',
-                ],
-            ],
-        ]);
-
-        $this->assertSame('settings.json', JsonStore::store('theme')->path());
-
-        Config::set('argonaut', [
-            'stores' => [
-                'theme' => [
-                    'disk' => 'local',
-                    'path' => 'theme.json',
-                ],
-            ],
-        ]);
-
-        $this->assertSame('theme.json', JsonStore::store('theme')->path());
-    }
 }

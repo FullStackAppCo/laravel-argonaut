@@ -41,11 +41,7 @@ class JsonStore
         $config = Config::get('argonaut.stores')[$name]
             ?? throw new ErrorException("Store '{$name}' is not configured");
 
-        if (App::environment('testing') === false && isset(static::$stores[$name])) {
-            return static::$stores[$name];
-        }
-
-        return static::$stores[$name] = static::build($config);
+        return static::$stores[$name] ?? static::$stores[$name] = static::build($config);
     }
 
     public function __construct(
