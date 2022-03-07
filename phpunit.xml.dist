@@ -13,7 +13,7 @@
          verbose="true"
 >
     <testsuites>
-        <testsuite name="Valuestore Test Suite">
+        <testsuite name="Laravel Argonaut Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
