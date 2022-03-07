@@ -53,13 +53,14 @@ $store->put('colors.primary', '#bada55');
 
 $store->get('colors');
 // => ['primary' => '#bada55']
+
 // Retrieve a nested value...
 $store->get('colors.primary');
 // => '#bada55'
 ```
 
 You **must** call the save method to persist your store to disk:
-```
+```php
 $store = Argonaut::store('theme');
 $store->put('color', '#bada55');
 
@@ -73,3 +74,6 @@ Argonaut::store('theme')->put('colors.primary', '#bada55')->save();
 
 ## Testing
 During testing an array driver is used so that data is not persisted to disk.
+
+## License
+MIT
