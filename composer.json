@@ -43,9 +43,6 @@
         "laravel": {
             "providers": [
                 "FullStackAppCo\\Argonaut\\ServiceProvider"
-            ],
-            "aliases": [
-                "FullStack"
             ]
         }
     }
