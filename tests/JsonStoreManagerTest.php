@@ -4,10 +4,10 @@ namespace Tests;
 use ErrorException;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
-use FullStackAppCo\Argonaut\Facades\Argonaut;
 use FullStackAppCo\Argonaut\JsonStoreManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
+use Nette\Utils\Json;
 
 class JsonStoreManagerTest extends TestCase
 {
@@ -59,5 +59,19 @@ class JsonStoreManagerTest extends TestCase
         $this->expectException(ErrorException::class);
         $this->expectExceptionMessage("Store 'site' is not configured");
         (new JsonStoreManager)->store('site');
+    }
+
+    public function test_it_uses_static_cache()
+    {
+        $config = [
+            'path' => 'settings.json',
+            'driver' => 'local'
+        ];
+        Config::set('argonaut.stores.test', $config);
+        $mock = $this->partialMock(JsonStoreManager::class);
+        $mock->shouldReceive('build')->with($config)->once();
+
+        $mock->store('test');
+        $mock->store('test');
     }
 }
