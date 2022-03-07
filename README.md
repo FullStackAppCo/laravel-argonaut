@@ -11,7 +11,7 @@ composer require fsac/laravel-argonaut
 
 Publish the configuration file
 ```
-php artisan vendor:publish --class='FullStackAppCo\Argonaut\ServiceProvider'
+php artisan vendor:publish --provider='FullStackAppCo\Argonaut\ServiceProvider'
 ```
 
 
