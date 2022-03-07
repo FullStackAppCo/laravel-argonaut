@@ -1,17 +1,75 @@
 > This package is currently in development
+> # Laravel Argonaut
 
-## Why?
-Cached JSON Store.
+Store simple, arbitrary, hierarchical values in one or more JSON Files persisted to the filesystem.
+Retrieve and store values using Laravel's convenient dot syntax. Cached for performance.
 
-You wanted to store some site preferences without the fiddle-faff and overkill of creating a Model and storing them in the database.
+## Installation
+```
+composer require fsac/laravel-argonaut
+```
 
-You don't want the preferences to be transferred from one site to another when you do a database dump. It's not everyone's use-case but sometimes you might prefer it.
+Publish the configuration file
+```
+php artisan vendor:publish --class='FullStackAppCo\Argonaut\ServiceProvider'
+```
 
-You want to leverage the hierarchical nature of JSON to group values stored.
 
-My use case was theme and sitewide settings.
+## Usage
+Add a store by providing a `stores` configuration in your `config/argonaut.php` file. You must provide
+the name of a disk configured in your `config/filesystems.php` and a path on that disk where Argonaut should 
+persist the store. Stores should be keyed with a unique name which will be used to retrieve them.
+```php
+[
+    'stores => [
+        'theme' => [
+            'path' => 'settings/theme.json',
+            'disk' => 'local,
+        ],
+    ],
+]
+```
 
-It's not a _preference_ because you don't want to associate with a particular model. Creating an 'App' or 'Site' model just to store settings seems a bit naff.
+The `Argonaut` facade can be used to retrieve a store which has been configured in `config/argonaut.php`
+```php
+use FullStackAppCo\Argonaut\Facades\Argonaut;
+
+Argonaut::store('theme');
+```
+
+Manipulating values:
+```php
+$store = Argonaut::store('theme');
+
+// Store a value...
+$store->put('color', '#bada55');
+
+// Retrieve a value...
+$store->get('color');
+// => '#bada55'
+
+// Store a nested value...
+$store->put('colors.primary', '#bada55');
+
+$store->get('colors');
+// => ['primary' => '#bada55']
+// Retrieve a nested value...
+$store->get('colors.primary');
+// => '#bada55'
+```
+
+You **must** call the save method to persist your store to disk:
+```
+$store = Argonaut::store('theme');
+$store->put('color', '#bada55');
+
+// Persist to disk...
+$store->save();
+
+// Methods may be chained for convenience...
+Argonaut::store('theme')->put('colors.primary', '#bada55')->save();
+
+```
 
 ## Testing
-During testing data will not be persisted to disk.
+During testing an array driver is used so that data is not persisted to disk.
