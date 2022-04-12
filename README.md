@@ -1,8 +1,7 @@
-> This package is currently in development
-> # Laravel Argonaut
+# Laravel Argonaut
 
-Store simple, arbitrary, hierarchical values in one or more JSON Files persisted to the filesystem.
-Retrieve and store values using Laravel's convenient dot syntax. Cached for performance.
+Store values in one or more JSON files using Laravel's convenient dot
+syntax and persist to the filesystem. Cached for performance.
 
 ## Installation
 ```
@@ -69,11 +68,29 @@ $store->save();
 
 // Methods may be chained for convenience...
 Argonaut::store('theme')->put('colors.primary', '#bada55')->save();
+```
 
+## Advanced Usage
+You may also create an on-demand Argonaut instance using the build method of the
+Argonaut facade and passing a file path and disk instance:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+// Using a disk from filesystems config
+$store = Argonaut::build('on-demand.json', Storage::disk('local'));
+$store->put('font.heading', 'Menlo')->save();
+
+// Using an on-demand disk
+$store = Argonaut::build('on-demand.json', Storage::build([
+    'driver' => 'local',
+    '/path/to/root',
+]));
+$store->put('musicians.rainbow', ['rod', 'jane', 'freddy'])->save();
 ```
 
 ## Testing
-During testing an array driver is used so that data is not persisted to disk.
+During testing an array driver is set to prevent data being persisted to disk.
 
 ## License
 MIT
