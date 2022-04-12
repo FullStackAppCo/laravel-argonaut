@@ -17,7 +17,7 @@ class ArrayDriver extends JsonStoreDriver
         $this->collection = Collection::make($state);
     }
 
-    protected function write(array $array): self
+    protected function write(array $array): JsonStoreDriver
     {
         $this->collection = collect($array);
         return $this;
