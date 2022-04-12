@@ -6,7 +6,10 @@ use Illuminate\Support\Arr;
 
 abstract class JsonStoreDriver
 {
-    protected array $data;
+    /**
+     * @var array
+     */
+    protected $data;
 
     /**
      * Retrieve data.

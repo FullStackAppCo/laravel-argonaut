@@ -7,7 +7,6 @@ use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
 use FullStackAppCo\Argonaut\JsonStoreManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use Nette\Utils\Json;
 
 class JsonStoreManagerTest extends TestCase
 {

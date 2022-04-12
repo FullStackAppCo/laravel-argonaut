@@ -8,20 +8,32 @@ use Illuminate\Support\Facades\Cache;
 
 class FilesystemDriver extends JsonStoreDriver
 {
-    protected JsonStoreManager $store;
+    /**
+     * @var JsonStoreManager
+     */
+    protected $store;
 
-    public function __construct(
-        protected string $path,
-        protected Filesystem $disk
-    )
+    /**
+     * @var string
+     */
+    protected $path;
+
+    /**
+     * @var Filesystem
+     */
+    protected $disk;
+
+    public function __construct(string $path, Filesystem $disk)
     {
-        //
+        $this->path = $path;
+        $this->disk = $disk;
     }
 
     /**
      * Convenience static factory method.
+     * @param string|array $config
      */
-    public static function build(string|array $config): static
+    public static function build($config): self
     {
         $driver = app(static::class, [
             'path' => $config['path'] ?? $config,
@@ -31,7 +43,7 @@ class FilesystemDriver extends JsonStoreDriver
         return $driver;
     }
 
-    protected function write(array $data): static
+    protected function write(array $data): JsonStoreDriver
     {
         Cache::forget($this->cacheKey());
 
