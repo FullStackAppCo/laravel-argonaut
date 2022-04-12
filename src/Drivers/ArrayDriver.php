@@ -7,7 +7,10 @@ use Illuminate\Support\Collection;
 class ArrayDriver extends JsonStoreDriver
 {
 
-    public Collection $collection;
+    /**
+     * @var Collection
+     */
+    public $collection;
 
     public function __construct(array $state = [])
     {
