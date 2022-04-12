@@ -16,7 +16,7 @@ class JsonStoreManager
      */
     public function store(string $name): JsonStoreDriver
     {
-        $config = Config::get('argonaut.stores')[$name];
+        $config = Config::get('argonaut.stores')[$name] ?? null;
 
         if ($config === null) {
             throw new ErrorException("Store '{$name}' is not configured");
