@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\Config;
 
 class JsonStoreManager
 {
-    protected array $stores;
+    /**
+     * @var array
+     */
+    protected $stores;
 
     /**
      * Get an instance based on configuration file.
