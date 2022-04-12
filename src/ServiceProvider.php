@@ -22,11 +22,11 @@ class ServiceProvider extends BaseProvider
         $this->app->bind(FilesystemDriver::class, function ($app, $args) {
             return new FilesystemDriver(
                 $args['path'],
-                with($args['disk'] ?? null, fn ($disk) =>
-                    $disk instanceof Filesystem
+                with($args['disk'] ?? null, function ($disk) use ($app) {
+                    return $disk instanceof Filesystem
                         ? $disk
-                        : $app->make('filesystem')->disk($disk)
-                )
+                        : $app->make('filesystem')->disk($disk);
+                })
             );
         });
     }
