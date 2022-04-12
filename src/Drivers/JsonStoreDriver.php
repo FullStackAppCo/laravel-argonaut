@@ -30,14 +30,14 @@ abstract class JsonStoreDriver
         return $this->data = $this->read();
     }
 
-    public function put(string $key, mixed $value): JsonStoreDriver
+    public function put(string $key, $value): JsonStoreDriver
     {
         $all = $this->all();
         $this->data = data_set($all, $key, $value);
         return $this;
     }
 
-    public function get(string $key): mixed
+    public function get(string $key)
     {
         $data = $this->all();
         return data_get($data, $key);
