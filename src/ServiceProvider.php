@@ -15,7 +15,7 @@ class ServiceProvider extends BaseProvider
     {
         $this->app->bind(JsonStoreDriver::class, function ($app, $args) {
             return ($app->runningUnitTests() === true)
-                ? new ArrayDriver([])
+                ? new ArrayDriver($args)
                 : $app->make(FilesystemDriver::class, $args);
         });
 
