@@ -4,6 +4,7 @@ namespace Tests;
 use ErrorException;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
+use FullStackAppCo\Argonaut\Facades\Argonaut;
 use FullStackAppCo\Argonaut\JsonStoreManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -72,5 +73,15 @@ class JsonStoreManagerTest extends TestCase
 
         $mock->store('test');
         $mock->store('test');
+    }
+
+    public function test_stores_can_be_set()
+    {
+        Config::set('argonaut.stores.test', ['name' => 'Initial']);
+        $manager = new JsonStoreManager;
+
+        $this->assertSame('Initial', $manager->store('test')->get('name'));
+        $manager->set('test', $manager->build(['name' => 'Overridden!!!']));
+        $this->assertSame('Overridden!!!', $manager->store('test')->get('name'));
     }
 }

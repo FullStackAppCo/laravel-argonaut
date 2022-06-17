@@ -32,4 +32,11 @@ class JsonStoreManager
     {
         return App::make(JsonStoreDriver::class, $config);
     }
+
+
+    public function set(string $name, JsonStoreDriver $store) : JsonStoreManager
+    {
+        $this->stores[$name] = $store;
+        return $this;
+    }
 }
