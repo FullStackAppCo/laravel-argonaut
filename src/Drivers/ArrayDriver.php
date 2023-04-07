@@ -12,9 +12,13 @@ class ArrayDriver extends JsonStoreDriver
      */
     public $collection;
 
-    public function __construct(array $state = [])
+    public function __construct(
+        array $state = [],
+        array $defaults = []
+    )
     {
         $this->collection = Collection::make($state);
+        parent::__construct($defaults);
     }
 
     protected function write(array $array): JsonStoreDriver

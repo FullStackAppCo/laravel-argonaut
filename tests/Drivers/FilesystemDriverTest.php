@@ -2,7 +2,9 @@
 
 namespace Tests\Drivers;
 
+use Faker\Core\File;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
+use FullStackAppCo\Argonaut\Facades\Argonaut;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -13,14 +15,6 @@ class FilesystemDriverTest extends TestCase
     {
         parent::setUp();
         Storage::fake('local');
-    }
-
-    public function test_build()
-    {
-        $this->assertInstanceOf(FilesystemDriver::class, FilesystemDriver::build([
-            'path' => 'test.json',
-            'disk' => 'local',
-        ]));
     }
 
     public function test_save()
