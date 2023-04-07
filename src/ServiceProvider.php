@@ -6,7 +6,6 @@ use FullStackAppCo\Argonaut\Drivers\ArrayDriver;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider as BaseProvider;
 
 class ServiceProvider extends BaseProvider
@@ -14,9 +13,11 @@ class ServiceProvider extends BaseProvider
     public function register()
     {
         $this->app->bind(JsonStoreDriver::class, function ($app, $args) {
-            return ($app->runningUnitTests() === true)
-                ? new ArrayDriver($args)
-                : $app->make(FilesystemDriver::class, $args);
+            if ((! isset($args['driver'])) && $app->runningUnitTests() === true) {
+                return new ArrayDriver([], $args['defaults'] ?? []);
+            }
+
+            return $app->make($args['driver'] ?? FilesystemDriver::class, $args);
         });
 
         $this->app->bind(FilesystemDriver::class, function ($app, $args) {

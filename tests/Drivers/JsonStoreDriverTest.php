@@ -14,17 +14,20 @@ class JsonStoreDriverTest extends TestCase
     {
         return new class($data, $defaults) extends JsonStoreDriver
         {
+            protected array $source;
+
             public function __construct(
-                protected array $data,
+                array $data,
                 array $defaults
             )
             {
+                $this->source = $data;
                 parent::__construct($defaults);
             }
 
             public function read(): array
             {
-                return $this->data;
+                return $this->source;
             }
 
             protected function write(array $data): JsonStoreDriver
@@ -71,4 +74,59 @@ class JsonStoreDriverTest extends TestCase
         $this->assertNull($store->get('foo'));
     }
 
+
+    public function test_all()
+    {
+        $store = $this->storeInstance([
+            'color' => '#BADA55',
+            'font' => 'Menlo'
+        ]);
+
+        $this->assertSame([
+            'color' => '#BADA55',
+            'font' => 'Menlo'
+        ], $store->all());
+    }
+
+    public function test_all_merges_defaults()
+    {
+        $store = $this->storeInstance(
+            data: ['font' => 'Menlo'],
+            defaults: [
+                'font' => 'Comic Sans',
+                'color' => '#BADA55'
+            ],
+        );
+
+        $this->assertEquals([
+            'color' => '#BADA55',
+            'font' => 'Menlo'
+        ], $store->all());
+    }
+
+    public function test_all_merges_defaults_recursively()
+    {
+        $store = $this->storeInstance(
+            data: [
+                'font' => 'Menlo',
+                'color' => [
+                    'primary' => '#BADA55',
+                ]
+            ],
+            defaults: [
+                'color' => [
+                    'primary' => 'yellow',
+                    'secondary' => 'salmon',
+                ]
+            ],
+        );
+
+        $this->assertEquals([
+            'font' => 'Menlo',
+            'color' => [
+                'primary' => '#BADA55',
+                'secondary' => 'salmon',
+            ],
+        ], $store->all());
+    }
 }
