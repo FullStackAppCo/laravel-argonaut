@@ -33,10 +33,10 @@ abstract class JsonStoreDriver
             return $this->data;
         }
 
-        return $this->data = Arr::undot([
-            ...Arr::dot($this->defaults),
-            ...Arr::dot($this->read())
-        ]);
+        return $this->data = Arr::undot(array_merge(
+            Arr::dot($this->defaults),
+            Arr::dot($this->read())
+        ));
     }
 
     public function put(string $key, $value): JsonStoreDriver
