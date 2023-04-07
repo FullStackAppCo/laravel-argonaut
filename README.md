@@ -6,7 +6,7 @@ Simple JSON file-based store for Laravel. Cached for performance.
 
 ## Support
 
-| Laravel | Laravel React Make |
+| Laravel | Laravel Argonaut   |
 |---------|--------------------|
 | 10, 9   | 2                  |
 | 9, 8    | 1                  |
