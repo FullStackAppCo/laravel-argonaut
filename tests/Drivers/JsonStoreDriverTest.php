@@ -3,7 +3,6 @@
 namespace Tests\Drivers;
 
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
-use FullStackAppCo\Argonaut\JsonStoreManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -11,17 +10,16 @@ use Tests\TestCase;
 class JsonStoreDriverTest extends TestCase
 {
 
-    public function storeInstance(array $data = [])
+    public function storeInstance(array $data = [], array $defaults = [])
     {
-        return new class($data) extends JsonStoreDriver
+        return new class($data, $defaults) extends JsonStoreDriver
         {
-            protected string $name = 'test';
-
             public function __construct(
-                protected $data
+                protected array $data,
+                array $defaults
             )
             {
-                //
+                parent::__construct($defaults);
             }
 
             public function read(): array
@@ -53,14 +51,13 @@ class JsonStoreDriverTest extends TestCase
         $this->assertSame('#F00BA9', $store->all()['color']['primary']);
     }
 
-    public function test_get_uses_configured_defaults()
+    public function test_get_uses_defaults()
     {
-        $store = $this->storeInstance();
-
-        Config::set('argonaut.stores.test.defaults.color', '#BADA55');
+        $store = $this->storeInstance(defaults: ['color' => '#BADA55']);
         $this->assertSame('#BADA55', $store->get('color'));
 
         Config::set('argonaut.stores.test.defaults.color', ['primary' => '#000']);
+        $store = $this->storeInstance(defaults: ['color' => ['primary' => '#000']]);
         $this->assertSame('#000', $store->get('color.primary'));
     }
 
