@@ -32,6 +32,9 @@ class JsonStoreManager
     }
 
 
+    /**
+     * @deprecated v2.1.0
+     */
     public function set(string $name, JsonStoreDriver $store) : JsonStoreManager
     {
         $this->stores[$name] = $store;
