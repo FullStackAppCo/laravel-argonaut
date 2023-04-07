@@ -3,8 +3,8 @@
 This repository follows [semver](https://semver.org).
 
 ## v2.2.0
-- Remove broken & undocumented ::fake facade method
-- Fix ArrayDriver container resolution
+- Removed broken & undocumented ::fake facade method
+- Fixed ArrayDriver container resolution
 
 ## v2.1.0
 - Configurable store defaults
