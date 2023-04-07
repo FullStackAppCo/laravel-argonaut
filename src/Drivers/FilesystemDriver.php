@@ -13,34 +13,14 @@ class FilesystemDriver extends JsonStoreDriver
      */
     protected $store;
 
-    /**
-     * @var string
-     */
-    protected $path;
 
-    /**
-     * @var Filesystem
-     */
-    protected $disk;
-
-    public function __construct(string $path, Filesystem $disk)
+    public function __construct(
+        protected string $path,
+        protected Filesystem $disk,
+        array $defaults = [],
+    )
     {
-        $this->path = $path;
-        $this->disk = $disk;
-    }
-
-    /**
-     * Convenience static factory method.
-     * @param string|array $config
-     */
-    public static function build($config): self
-    {
-        $driver = app(static::class, [
-            'path' => $config['path'] ?? $config,
-            'disk' => data_get($config, 'disk'),
-        ]);
-
-        return $driver;
+        parent::__construct($defaults);
     }
 
     protected function write(array $data): JsonStoreDriver

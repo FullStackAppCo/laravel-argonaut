@@ -18,6 +18,7 @@ return [
 //        'theme' => [
 //            'disk' => 'local',
 //            'path' => 'settings/theme.json',
+//            'defaults' => ['primary_color' => '#bada55'],
 //        ],
     ],
 

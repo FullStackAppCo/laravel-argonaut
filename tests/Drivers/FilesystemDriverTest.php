@@ -2,7 +2,9 @@
 
 namespace Tests\Drivers;
 
+use Faker\Core\File;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
+use FullStackAppCo\Argonaut\Facades\Argonaut;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -15,17 +17,9 @@ class FilesystemDriverTest extends TestCase
         Storage::fake('local');
     }
 
-    public function test_build()
-    {
-        $this->assertInstanceOf(FilesystemDriver::class, FilesystemDriver::build([
-            'path' => 'test.json',
-            'disk' => 'local',
-        ]));
-    }
-
     public function test_save()
     {
-        (new FilesystemDriver('test.json', Storage::disk('local')))
+        (new FilesystemDriver('test', 'test.json', Storage::disk('local')))
             ->put('foo', 'bar')
             ->put('baz', [2, 3, true, 'boz'])
             ->save();
@@ -49,26 +43,26 @@ class FilesystemDriverTest extends TestCase
 
         $this->assertSame(
             $data,
-            (new FilesystemDriver('settings.json', Storage::disk('local')))->read()
+            (new FilesystemDriver('test', 'settings.json', Storage::disk('local')))->read()
         );
     }
 
     public function test_it_returns_empty_array_when_no_file()
     {
-        $driver = (new FilesystemDriver('test.json', Storage::disk('local')));
+        $driver = (new FilesystemDriver('test', 'test.json', Storage::disk('local')));
         $this->assertEquals([], $driver->read());
         Storage::assertMissing('settings.json');
     }
 
     public function test_empty_data_is_not_persisted()
     {
-        (new FilesystemDriver('settings.json', Storage::disk('local')))->save();
+        (new FilesystemDriver('test', 'settings.json', Storage::disk('local')))->save();
         Storage::assertMissing('settings.json');
     }
 
     public function test_path()
     {
-        $driver = new FilesystemDriver('path/to/settings.json', Storage::disk());
+        $driver = new FilesystemDriver('test', 'path/to/settings.json', Storage::disk());
 
         $this->assertSame('path/to/settings.json', $driver->path());
         $this->assertSame(Storage::path('path/to/settings.json'), $driver->path($absolute = true));
@@ -76,7 +70,7 @@ class FilesystemDriverTest extends TestCase
 
     public function test_it_forgets_cached_on_save()
     {
-        $driver = (new FilesystemDriver('settings.json', Storage::disk('local')))->put('color', 'yellow');
+        $driver = (new FilesystemDriver('test', 'settings.json', Storage::disk('local')))->put('color', 'yellow');
 
         Cache::shouldReceive('forget')->once()->with($driver->cacheKey());
         $driver->save();
@@ -84,7 +78,7 @@ class FilesystemDriverTest extends TestCase
 
     public function test_it_caches_on_read()
     {
-        $driver = (new FilesystemDriver('settings.json', Storage::disk('local')));
+        $driver = (new FilesystemDriver('test', 'settings.json', Storage::disk('local')));
         Storage::disk('local')->put('settings.json', $driver->encode([
             'testing' => 123,
         ]));
@@ -97,7 +91,7 @@ class FilesystemDriverTest extends TestCase
 
     public function test_it_prefers_cached_data_when_available ()
     {
-        $store = new FilesystemDriver('settings.json', Storage::disk('local'));
+        $store = new FilesystemDriver('test', 'settings.json', Storage::disk('local'));
         Cache::set($store->cacheKey(), ['color' => 'yellow']);
 
         $this->assertSame('yellow', $store->get('color'));
@@ -110,7 +104,7 @@ class FilesystemDriverTest extends TestCase
             'driver' => 'local'
         ]);
 
-        (new FilesystemDriver('settings.json', $disk))->put('color', 'yellow')->save();
+        (new FilesystemDriver('test', 'settings.json', $disk))->put('color', 'yellow')->save();
 
         Storage::disk('local')->assertExists('on-demand/settings.json');
     }

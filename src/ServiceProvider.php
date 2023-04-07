@@ -2,11 +2,11 @@
 
 namespace FullStackAppCo\Argonaut;
 
-use FullStackAppCo\Argonaut\Contracts\JsonStoreDriverContract;
 use FullStackAppCo\Argonaut\Drivers\ArrayDriver;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider as BaseProvider;
 
 class ServiceProvider extends BaseProvider
@@ -26,7 +26,8 @@ class ServiceProvider extends BaseProvider
                     return $disk instanceof Filesystem
                         ? $disk
                         : $app->make('filesystem')->disk($disk);
-                })
+                }),
+                $args['defaults'] ?? [],
             );
         });
     }

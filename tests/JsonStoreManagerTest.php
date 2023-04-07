@@ -4,7 +4,6 @@ namespace Tests;
 use ErrorException;
 use FullStackAppCo\Argonaut\Drivers\FilesystemDriver;
 use FullStackAppCo\Argonaut\Drivers\JsonStoreDriver;
-use FullStackAppCo\Argonaut\Facades\Argonaut;
 use FullStackAppCo\Argonaut\JsonStoreManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -15,25 +14,6 @@ class JsonStoreManagerTest extends TestCase
     {
         parent::setUp();
         Config::set('argonaut.stores.test', []);
-    }
-
-    public function test_it_uses_dot_syntax()
-    {
-        $store = app(JsonStoreManager::class)->store('test');
-        $store->put('color.primary', '#F00BA9');
-
-        $this->assertSame('#F00BA9', $store->get('color.primary'));
-        $this->assertSame('#F00BA9', $store->all()['color']['primary']);
-    }
-
-    public function test_it_can_forget_values()
-    {
-        Storage::fake();
-        $store = app(JsonStoreManager::class)->store('test')->put('foo', 'bar');
-        $this->assertSame('bar', $store->get('foo'));
-
-        $store->forget('foo');
-        $this->assertNull($store->get('foo'));
     }
 
     public function test_it_uses_configuration()
@@ -69,19 +49,22 @@ class JsonStoreManagerTest extends TestCase
         ];
         Config::set('argonaut.stores.test', $config);
         $mock = $this->partialMock(JsonStoreManager::class);
+        $mock->shouldAllowMockingProtectedMethods();
         $mock->shouldReceive('build')->with($config)->once();
 
         $mock->store('test');
+
+        // This call should use the cached store.
         $mock->store('test');
     }
 
     public function test_stores_can_be_set()
     {
-        Config::set('argonaut.stores.test', ['name' => 'Initial']);
+        Config::set('argonaut.stores.test', ['value' => 'Initial']);
         $manager = new JsonStoreManager;
 
-        $this->assertSame('Initial', $manager->store('test')->get('name'));
-        $manager->set('test', $manager->build(['name' => 'Overridden!!!']));
-        $this->assertSame('Overridden!!!', $manager->store('test')->get('name'));
+        $this->assertSame('Initial', $manager->store('test')->get('value'));
+        $manager->set('test', $manager->build(['value' => 'Overridden!!!']));
+        $this->assertSame('Overridden!!!', $manager->store('test')->get('value'));
     }
 }

@@ -9,10 +9,7 @@ use Illuminate\Support\Facades\Config;
 
 class JsonStoreManager
 {
-    /**
-     * @var array
-     */
-    protected $stores;
+    protected array $stores = [];
 
     /**
      * Get an instance based on configuration file.
@@ -25,7 +22,8 @@ class JsonStoreManager
             throw new ErrorException("Store '{$name}' is not configured");
         }
 
-        return $this->stores[$name] ?? $this->stores[$name] = $this->build($config);
+        return $this->stores[$name]
+            ?? $this->stores[$name] = $this->build($config);
     }
 
     public function build(array $config): JsonStoreDriver

@@ -1,6 +1,7 @@
 <?php
-namespace Tests;
+namespace Tests\Facades;
 
+use Tests\TestCase;
 use FullStackAppCo\Argonaut\Drivers\ArrayDriver;
 use FullStackAppCo\Argonaut\Facades\Argonaut;
 use Illuminate\Support\Facades\Config;

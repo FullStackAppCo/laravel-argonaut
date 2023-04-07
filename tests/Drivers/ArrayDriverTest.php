@@ -13,7 +13,7 @@ class ArrayDriverTest extends TestCase
             'foo' => 'bar',
             'baz' => [1, 5, true, 'testing'],
         ];
-        $this->assertSame($data, (new ArrayDriver($data))->save()->collection->toArray());
+        $this->assertSame($data, (new ArrayDriver('test', $data))->save()->collection->toArray());
     }
 
     public function test_read()
@@ -22,6 +22,6 @@ class ArrayDriverTest extends TestCase
             'foo' => 'bar',
             'baz' => [1, 5, true, 'testing'],
         ];
-        $this->assertSame($data, (new ArrayDriver($data))->read());
+        $this->assertSame($data, (new ArrayDriver('test', $data))->read());
     }
 }

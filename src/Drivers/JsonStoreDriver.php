@@ -3,13 +3,19 @@
 namespace FullStackAppCo\Argonaut\Drivers;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 
 abstract class JsonStoreDriver
 {
-    /**
-     * @var array
-     */
-    protected $data;
+
+    protected array $data;
+
+    protected function __construct(
+        protected array $defaults = []
+    )
+    {
+        //
+    }
 
     /**
      * Retrieve data.
@@ -40,7 +46,7 @@ abstract class JsonStoreDriver
     public function get(string $key)
     {
         $data = $this->all();
-        return data_get($data, $key);
+        return data_get($data, $key, data_get($this->defaults, $key));
     }
 
     public function forget(string $key): JsonStoreDriver
